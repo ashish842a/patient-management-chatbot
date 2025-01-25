@@ -26,7 +26,7 @@
             <!-- Loader -->
             <div x-show="loading" class="text-center mb-4">
                 <div class="animate-spin h-8 w-8 border-4 border-t-4 border-gray-200 rounded-full mx-auto mb-2"></div>
-                <p>Loading...</p>
+                <p>Fething Details...</p>
             </div>
 
             <button type="submit" class="w-full bg-indigo-600 text-white py-3 rounded-lg hover:bg-indigo-700 focus:outline-none">Get Patient Summary</button>
@@ -76,6 +76,12 @@
                 <p><strong>Gender:</strong> ${result.patient_details.Gender}</p>
                 <p><strong>Diagnosis History:</strong> ${result.patient_details.DiagnosisHistory}</p>
                 <p><strong>Treatment History:</strong> ${result.patient_details.TreatmentHistory}</p>
+                <p><strong>PastMedical History:</strong> ${result.patient_details.PastMedicalHistory}</p>
+                <p><strong>Prescription History:</strong> ${result.patient_details.Prescription}</p>
+                <p><strong>DoctorNotes History:</strong> ${result.patient_details.DoctorNotes}</p>
+                <p><strong>Allergies:</strong> ${result.patient_details.Allergies}</p>
+                <p><strong>FamilyHistory History:</strong> ${result.patient_details.FamilyHistory}</p>
+                <p><strong>Last Visit:</strong> ${result.patient_details.LastVisit}</p>
             `;
             document.getElementById('summary').textContent = result.summary;
 

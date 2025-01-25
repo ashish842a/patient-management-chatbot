@@ -43,7 +43,7 @@ async def get_llm_response(query, chunks):
         raise e
 
 # Function to fetch patient data by ID from CSV
-def get_patient_by_id(patient_id, csv_file='D:\my_work\Doctor\Patient_management_system\Dataset\patients_record_1k.csv'):
+def get_patient_by_id(patient_id, csv_file='patients.csv'):
     """Fetch patient details by patient ID from a CSV file."""
     try:
         with open(csv_file, mode='r') as file:
@@ -61,49 +61,41 @@ def get_patient_by_id(patient_id, csv_file='D:\my_work\Doctor\Patient_management
         logging.error(f"Error reading CSV file: {e}")
         return None
 
-# Main function to get concise patient history
-async def get_patient_summary(patient_id, csv_file='D:\my_work\Doctor\Patient_management_system\Dataset\patients_record_1k.csv'):
-    """Fetch the patient's summary from their medical records."""
-    patient_record = get_patient_by_id(patient_id, csv_file)
+# Main function to handle the chatbot workflow
+async def chatbot_workflow():
+    """Interactive chatbot workflow to fetch patient summary."""
+    print("Chatbot: Hi, I need my patient summary.")
+    user_id = input("User: Please provide your user ID: ")
     
+    # Fetch patient data
+    patient_record = get_patient_by_id(user_id)
     if not patient_record:
-        return {"error": "Patient not found"}
+        print(f"Chatbot: Patient ID {user_id} not found.")
+        return
     
     # Prepare the history text to send to LLM
     full_history = (
         f"Diagnosis History: {patient_record['DiagnosisHistory']}. "
         f"Treatment History: {patient_record['TreatmentHistory']}."
-        f"PastMedical History: {patient_record['PastMedicalHistory']}."
-        f"Prescription History: {patient_record['Prescription']}."
-        f"DoctorNotes History: {patient_record['DoctorNotes']}."
-        f"Allergies: {patient_record['Allergies']}."
-        f"Family History: {patient_record['FamilyHistory']}."
-        f"Last Visit History: {patient_record['LastVisit']}."
     )
     
-    # Call LLM to get concise summary
+    # Get the summary from the LLM
     try:
-        summary = await get_llm_response("Summarize the patient's diagnosis and treatment history.", [full_history])
+        summary = await get_llm_response(
+            "Summarize the patient's diagnosis and treatment history.",
+            [full_history]
+        )
+        print("Chatbot: Here is the summary:")
+        print(f"  - Patient ID: {patient_record['PatientID']}")
+        print(f"  - Age: {patient_record['Age']}")
+        print(f"  - Conditions: {patient_record['Conditions']}")
+        print(f"  - Medications: {patient_record['Medications']}")
+        print(f"  - Last Visit: {patient_record['LastVisit']}")
+        print(f"  - Summary: {summary}")
     except Exception as e:
         logging.error("Error generating summary from LLM.")
-        return {"error": "Failed to generate summary"}
-    
-    return {
-        "patient_details": patient_record,
-        "summary": summary
-    }
+        print("Chatbot: Failed to generate summary.")
 
-# Test the function
-async def test_patient_summary():
-    # Test with a valid patient ID
-    result = await get_patient_summary("1")
-    print(result["summary"])
-    # print(result["patient_details"])
-
-    # Test with an invalid patient ID
-    # result_invalid = await get_patient_summary("999")
-    # print(result_invalid)
-
-# Run the test
+# Run the chatbot workflow
 if __name__ == "__main__":
-    asyncio.run(test_patient_summary())
+    asyncio.run(chatbot_workflow())
