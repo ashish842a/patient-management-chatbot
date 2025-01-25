@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patient Summary</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://unpkg.com/alpinejs@3.12.0/dist/cdn.min.js" defer></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 font-sans">
+
+<!-- Main Container -->
+<div class="container mx-auto py-10">
+
+    <h1 class="text-3xl font-semibold text-center mb-8">Patient Summary</h1>
+
+    <!-- Patient ID Form -->
+    <div class="max-w-lg mx-auto p-6 bg-white rounded-lg shadow-lg">
+        <form id="patientForm" action="/get_patient_summary" method="POST" x-data="{loading: false}" @submit.prevent="loading = true">
+            <div class="mb-4">
+                <label for="patient_id" class="block text-gray-700 text-sm font-bold mb-2">Patient ID:</label>
+                <input type="text" id="patient_id" name="patient_id" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600" placeholder="Enter Patient ID" required>
+            </div>
+
+            <!-- Loader -->
+            <div x-show="loading" class="text-center mb-4">
+                <div class="animate-spin h-8 w-8 border-4 border-t-4 border-gray-200 rounded-full mx-auto mb-2"></div>
+                <p>Loading...</p>
+            </div>
+
+            <button type="submit" class="w-full bg-indigo-600 text-white py-3 rounded-lg hover:bg-indigo-700 focus:outline-none">Get Patient Summary</button>
+        </form>
+    </div>
+
+    <!-- Patient Summary Section -->
+    <div id="patientSummary" class="mt-8 hidden max-w-lg mx-auto p-6 bg-white rounded-lg shadow-lg">
+        <h2 class="text-xl font-semibold mb-4">Patient Details:</h2>
+        <div id="patientDetails"></div>
+        <h2 class="text-xl font-semibold mt-6 mb-4">Summary:</h2>
+        <p id="summary" class="text-gray-700"></p>
+    </div>
+
+</div>
+
+<script>
+    document.getElementById('patientForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const patientId = document.getElementById('patient_id').value;
+        const loader = document.querySelector('[x-data]');
+
+        // Show loader
+        loader.loading = true;
+
+        try {
+            // Send request to backend
+            const response = await axios.post('/get_patient_summary', new FormData(this), {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                }
+            });
+
+            const result = response.data;
+
+            if (result.error) {
+                alert(result.error);
+                loader.loading = false;
+                return;
+            }
+
+            // Display the patient details and summary
+            document.getElementById('patientDetails').innerHTML = `
+                <p><strong>Name:</strong> ${result.patient_details.Name}</p>
+                <p><strong>Age:</strong> ${result.patient_details.Age}</p>
+                <p><strong>Gender:</strong> ${result.patient_details.Gender}</p>
+                <p><strong>Diagnosis History:</strong> ${result.patient_details.DiagnosisHistory}</p>
+                <p><strong>Treatment History:</strong> ${result.patient_details.TreatmentHistory}</p>
+            `;
+            document.getElementById('summary').textContent = result.summary;
+
+            // Show the result section and hide the form
+            document.getElementById('patientSummary').classList.remove('hidden');
+        } catch (error) {
+            alert('An error occurred while fetching patient summary.');
+        } finally {
+            loader.loading = false;
+        }
+    });
+</script>
+
+</body>
+</html>
